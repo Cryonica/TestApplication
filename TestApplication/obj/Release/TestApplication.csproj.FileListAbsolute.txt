@@ -15,3 +15,4 @@ C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestAppli
 C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.CopyComplete
 C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.exe
 C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.pdb
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.InfoForm.resources

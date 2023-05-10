@@ -90,13 +90,13 @@ namespace TestApplication
                         //for test mode - delete table
 
 #if DEBUG
-                        //var tableName1 = "InventLocation";
-                        //var tableName2 = "InventDim";
-                        //var sql1 = $"TRUNCATE TABLE {tableName1}";
-                        //var sql2 = $"TRUNCATE TABLE {tableName2}";
-                        //db.Database.ExecuteSqlCommand(sql1);
-                        //db.Database.ExecuteSqlCommand(sql2);
-                        //db.SaveChanges();
+                        var tableName1 = "InventLocation";
+                        var tableName2 = "InventDim";
+                        var sql1 = $"TRUNCATE TABLE {tableName1}";
+                        var sql2 = $"TRUNCATE TABLE {tableName2}";
+                        db.Database.ExecuteSqlCommand(sql1);
+                        db.Database.ExecuteSqlCommand(sql2);
+                        db.SaveChanges();
 #endif
 
 
@@ -255,9 +255,11 @@ namespace TestApplication
         private  void button1_Click(object sender, EventArgs e)
         {
             if (selectedItem == null) return;
-            AddNewElement addNewElement = new AddNewElement(selectedItem);
-            addNewElement.TopMost = true;
-            addNewElement.StartPosition = FormStartPosition.CenterScreen;
+            AddNewElement addNewElement = new AddNewElement(selectedItem)
+            {
+                TopMost = true,
+                StartPosition = FormStartPosition.CenterScreen
+            };
             this.TopMost = false;
             DialogResult dialogResult = addNewElement.ShowDialog();
             if (dialogResult == DialogResult.OK)
