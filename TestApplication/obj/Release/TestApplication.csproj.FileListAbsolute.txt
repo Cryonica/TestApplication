@@ -1,0 +1,17 @@
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\TestApplication.exe.config
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\TestApplication.exe
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\TestApplication.pdb
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\EntityFramework.dll
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\EntityFramework.SqlServer.dll
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\EntityFramework.xml
+C:\Users\user\source\repos\TestApplication\TestApplication\bin\Release\EntityFramework.SqlServer.xml
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.AssemblyReference.cache
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.SuggestedBindingRedirects.cache
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.AddNewElement.resources
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.Form1.resources
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.Properties.Resources.resources
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.GenerateResource.cache
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.CoreCompileInputs.cache
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.csproj.CopyComplete
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.exe
+C:\Users\user\source\repos\TestApplication\TestApplication\obj\Release\TestApplication.pdb
