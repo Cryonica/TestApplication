@@ -87,7 +87,10 @@ namespace TestApplication.Helpers
             int fist_index_num = 0;
             foreach (var inventLocation in inventLocations)
             {
-                for(int i = 1; i <=1000; i++)
+                byte[] date = BitConverter.GetBytes(DateTime.Now.Ticks);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(date);
+                for (int i = 1; i <=1000; i++)
                 {
                     InventDim inventDim = new InventDim
                     {
@@ -101,7 +104,7 @@ namespace TestApplication.Helpers
                         InventSiteId = Guid.NewGuid().ToString().Substring(0, 10),
                         InventSizeId = Guid.NewGuid().ToString().Substring(0, 10),
                         RecordId = GenerateRandomLongID(),
-                        RowVersion = BitConverter.GetBytes(inventLocation.CreateDateTime.Ticks),
+                        RowVersion = date,
                         CreatedBy = GetRandomName(mockNames),
                         ModifiedBy = GetRandomName(mockNames)
 
