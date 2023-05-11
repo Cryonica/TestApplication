@@ -13,20 +13,20 @@ using TestApplication.Helpers;
 
 namespace TestApplication
 {
+    /// <summary>
+    /// Global Variables
+    /// <param name="db">Database Context</param>
+    /// <param name="inventLocations">List of InventLocation. The list is updated only first launch</param>
+    /// <param name="inventDims">List of InventDim.The list is updated on every InventLocation selection event in the table</param>
+    /// <param name="firstLoad">Needed to disable string formatting on first load</param>
+    /// <param name="infoForm">Its splash window for notify the user about manipulations in the database</param>
+    /// <param name="selectedItem">Current InventLocation</param>
+    /// <param name="appLogger">Its Logger for write message in the errors file</param>
+    /// <param name="errorFileName">file name for save errors</param>
+    /// </summary>
     public partial class Form1 : Form
     {
-        /// <summary>
-        /// Global Variables
-        /// <param name="db">Database Context</param>
-        /// <param name="inventLocations">List of InventLocation. The list is updated only first launch</param>
-        /// <param name="inventDims">List of InventDim.The list is updated on every InventLocation selection event in the table</param>
-        /// <param name="firstLoad">Needed to disable string formatting on first load</param>
-        /// <param name="infoForm">Its splash window for notify the user about manipulations in the database</param>
-        /// <param name="selectedItem">Current InventLocation</param>
-        /// <param name="appLogger">Its Logger for write message in the errors file</param>
-        /// <param name="errorFileName">file name for save errors</param>
-        /// </summary>
-
+        
         TestDB db;
         List<InventLocation> inventLocations = new List<InventLocation>();
         List<InventDim> inventDims = new List<InventDim>();
@@ -35,6 +35,7 @@ namespace TestApplication
         InventLocation selectedItem = null;
         internal Loggeer appLogger = null;
         const string errorFileName = "errors.log";
+        
         public Form1()
         {
             
@@ -52,11 +53,21 @@ namespace TestApplication
             this.Load += Form1_Load;
             
         }
+
         #region UI events
+        /// <summary>
+        /// UI events
+        /// <param name="Form1_Load">Event after mainForm load</param>
+        /// <param name="InventDiDataGrid_CellFormatting">Event for DiDataGrid cell formatting</param>
+        /// <param name="InventLocationDataGrid_DataError">Not used. This is an error handler during row creating</param>
+        /// <paramref name="InventLocationDataGrid_SelectionChanged">Event for hooking selection changes in InventLocationDataGrid</paramref>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-
+            
             UniqueWMS.Text = "Please select row from left table";
 
             //loading records from dataBase
@@ -223,7 +234,6 @@ namespace TestApplication
         //create mock records in dataBase
         private void AddDataToDateBase()
         {
-
             //first start check records and adding mock data
             using (db = new TestDB())
             {
@@ -300,11 +310,15 @@ namespace TestApplication
                 }
             }
         }
-        
+
         //main application function
+        /// <summary>
+        /// <param name="dataGridView">Instance of DataGridView</param>
+        /// <param name="values">Values list for creating rows</param>
+        /// </summary>
         private Task<int> FillDataGridView<T>(DataGridView dataGridView, List<T> values)
         {
-
+            
             var result = Task.Run(() =>
             {
                 //manipulation with dataGridView in another thread
@@ -357,10 +371,12 @@ namespace TestApplication
         }
 
         //function for close splash window
+        ///<summary>
+        ///<param name="form">Splash window instance</param>
+        /// </summary>
         private void CloseInfoForm(InfoForm form)
         {
-            
-            
+           
             if (form != null)
             {
                 if (form.InvokeRequired)
