@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TestApplication.Helpers;
@@ -15,6 +11,7 @@ namespace TestApplication
     {
         TestDB db;
         InventLocation inventLocation;
+        internal InfoForm infoForm;
         public AddNewElement(InventLocation inventLocation)
         {
             InitializeComponent();
@@ -35,7 +32,7 @@ namespace TestApplication
                         .Distinct()
                         .Cast<int>()
                         .OrderBy(s => s)
-                        .ToArray()
+                        .AsEnumerable()
                         .Select(el=> el.ToString().PadLeft(2, '0'))
                         .ToArray();
                         
@@ -82,8 +79,6 @@ namespace TestApplication
                     toValueInt = tempInt;
                     comboBox1.SelectedItem = comboBox2.SelectedItem;
                     comboBox2.SelectedItem = tempString;
-                    
-
                 }
             }
             else
@@ -107,27 +102,28 @@ namespace TestApplication
                 if (!presentTargetInventLocationId)
                 {
                     InventLocation newiIventLocation = MockDataFill.GetInventLocations(1).FirstOrDefault();
-                    newiIventLocation.InventLocationId = targetInventLocationId;
-                    db.InventLocation.Add(newiIventLocation);
-                    db.SaveChanges();
+                    if (newiIventLocation != null)
+                    {
+                        newiIventLocation.InventLocationId = targetInventLocationId;
+                        db.InventLocation.Add(newiIventLocation);
+                        db.SaveChanges();
+                    }
                 }
                 else
                 {
-                    InfoForm form = new InfoForm();
-                    form.TopMost = true;
+                    infoForm = new InfoForm("Update records");
+                    infoForm.TopMost = true;
                     Task.Run(() =>
                     {
-                        form.ShowDialog();
+                        infoForm.ShowDialog();
                     });
                     SaveChanges(fromValue, toValue, targetInventLocationId, db);
-                    form.Invoke((MethodInvoker)delegate ()
-                    {
-                        form.Close();
-                    });
+                    
 
                 }
             }
             DialogResult = DialogResult.OK;
+            
             this.Close();
             
         }

@@ -71,6 +71,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\Loggeer.cs" />
     <Compile Include="Helpers\MockDataFill.cs" />
     <Compile Include="InfoForm.cs">
       <SubType>Form</SubType>

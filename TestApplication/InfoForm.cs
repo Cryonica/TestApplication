@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,10 +6,10 @@ namespace TestApplication
 {
     public partial class InfoForm : Form
     {
-        
-        public InfoForm()
+        string loadingText;
+        public InfoForm(string message)
         {
-            
+            loadingText = message;
             InitializeComponent();
             this.Load += InfoForm_Load;
             
@@ -25,26 +19,26 @@ namespace TestApplication
 
         private async void InfoForm_Load(object sender, EventArgs e)
         {
-            
+            label1.Text = loadingText;
 
-            while (label1.Text.Length <=70) // пока задача не завершена
+            while (label1.Text.Length <=70)
             {
-                UpdateLoadingLabel(); // обновляем текст Label
-                await Task.Delay(500); // ждем полсекунды
+                await UpdateLoadingLabel();
+                await Task.Delay(500);
             }
 
             
         }
 
-        private async void UpdateLoadingLabel()
+        private async Task UpdateLoadingLabel()
         {
-            const int MaxLength = 50; // максимальная длина текста в Label
-            const string LoadingText = "Add records to database"; // текст, который будем добавлять в Label
+            const int MaxLength = 50;
+            
 
-            if (label1.Text.Length >= MaxLength) // если длина текста достигла максимальной длины
+            if (label1.Text.Length >= MaxLength)
             {
-                label1.Text = LoadingText; // обновляем текст Label
-                await Task.Delay(500); // ждем полсекунды
+                label1.Text = loadingText; 
+                await Task.Delay(500); 
             }
             else
             {
