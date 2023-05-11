@@ -76,10 +76,7 @@ namespace TestApplication
             {
                 if (fromValueInt > toValueInt)
                 {
-                    int tempInt = fromValueInt;
                     string tempString = comboBox1.SelectedItem.ToString();
-                    fromValueInt = toValueInt;
-                    toValueInt = tempInt;
                     comboBox1.SelectedItem = comboBox2.SelectedItem;
                     comboBox2.SelectedItem = tempString;
                 }

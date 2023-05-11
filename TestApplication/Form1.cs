@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TestApplication.Helpers;
 
+
+
 namespace TestApplication
 {
     /// <summary>
@@ -87,6 +89,7 @@ namespace TestApplication
                 CloseInfoForm(infoForm);
                 MessageBox.Show("Error during loading data");
                 this.Close();
+               
             }
         }
 
@@ -185,7 +188,7 @@ namespace TestApplication
                 TopMost = true,
                 StartPosition = FormStartPosition.CenterScreen
             };
-            //this.TopMost = false;
+            
             DialogResult dialogResult = addNewElement.ShowDialog();
             infoForm = addNewElement.infoForm;
             if (dialogResult == DialogResult.OK)
@@ -245,6 +248,7 @@ namespace TestApplication
             catch (Exception ex)
             {
                 Loggeer.Instance.Log(ex.Message);
+                
             }
             return result;
         }
@@ -381,7 +385,7 @@ namespace TestApplication
                             if (prop.PropertyType == typeof(byte[])) continue;
                             dataGridView.Columns.Add(prop.Name, prop.Name);
                         }
-
+                        var wors = new[] { "dddd", "ffff" };
                         //creating rows
                         foreach (var invent in values)
                         {
@@ -397,6 +401,10 @@ namespace TestApplication
                             row.Tag = invent;
                             row.ReadOnly = true;
                             dataGridView.Rows.Add(row);
+                            foreach (var w in wors)
+                            {
+                                var ss = w + "dd";
+                            }
 
                         }
 
@@ -434,8 +442,6 @@ namespace TestApplication
                 {
                     form.Close();
                 }
-                
-                
             }
         }
         #endregion
@@ -446,8 +452,9 @@ namespace TestApplication
             // take last timestamp from InventDim
 
             var rowVersions = new Dictionary<string, byte[]>();
-            foreach (var idim in selectedIdims)
+            for (int i = 0; i < selectedIdims.Count; i++)
             {
+                InventDim idim = selectedIdims[i];
                 var rowVersion = await GetRowVersionFromDatabase(idim.InventDimId);
                 rowVersions.Add(idim.InventDimId, rowVersion);
             }
@@ -456,8 +463,7 @@ namespace TestApplication
 
             foreach (DataGridViewRow row in dgv.Rows)
             {
-                var idim = row.Tag as InventDim;
-                if (idim != null && rowVersions.ContainsKey(idim.InventDimId) &&
+                if (row.Tag is InventDim idim && rowVersions.ContainsKey(idim.InventDimId) &&
                     !rowVersions[idim.InventDimId].SequenceEqual(idim.RowVersion))
                 {
                     //udate cells in DataGrid from db data

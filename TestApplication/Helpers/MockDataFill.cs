@@ -5,14 +5,14 @@ namespace TestApplication.Helpers
 {
     internal static class MockDataFill
     {
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
 
-        private static string[] mockNames = new string[20]
+        private static readonly string[] mockNames = new string[20]
         {
             "Bjorn",
             "Naeva",
-            "Cinema  ",
-            "Leane   ",
+            "Cinema",
+            "Leane",
             "Wa",
             "Melia",
             "Nehémie",
@@ -57,13 +57,18 @@ namespace TestApplication.Helpers
 
             return (firstDateTime, secondDateTime);
         }
+        private static byte[] GenerateTimeStamp()
+        {
+            byte[] date = BitConverter.GetBytes(DateTime.Now.Ticks);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(date);
+            return date;
+        }
         internal static List<InventLocation> GetInventLocations(int quantity)
         {
             List<InventLocation> locations = new List<InventLocation>();
             for (int i = 1; i <= quantity; i++)
             {
-                
-                
                 var datetime = GenerateRandomDateTimes();
                 InventLocation location = new InventLocation
                 {
@@ -75,7 +80,7 @@ namespace TestApplication.Helpers
                     UpdateDateTime = datetime.Item2,
                     CreatedBy = GetRandomName(mockNames),
                     ModifiedBy = GetRandomName(mockNames),
-                    //RowVersion = BitConverter.GetBytes(datetime.Item2.Ticks)
+                    RowVersion = GenerateTimeStamp()
                 };
                 locations.Add(location);
             }
@@ -87,9 +92,6 @@ namespace TestApplication.Helpers
             int fist_index_num = 0;
             foreach (var inventLocation in inventLocations)
             {
-                byte[] date = BitConverter.GetBytes(DateTime.Now.Ticks);
-                if (BitConverter.IsLittleEndian)
-                    Array.Reverse(date);
                 for (int i = 1; i <=1000; i++)
                 {
                     InventDim inventDim = new InventDim
@@ -104,7 +106,7 @@ namespace TestApplication.Helpers
                         InventSiteId = Guid.NewGuid().ToString().Substring(0, 10),
                         InventSizeId = Guid.NewGuid().ToString().Substring(0, 10),
                         RecordId = GenerateRandomLongID(),
-                        RowVersion = date,
+                        RowVersion = GenerateTimeStamp(),
                         CreatedBy = GetRandomName(mockNames),
                         ModifiedBy = GetRandomName(mockNames)
 
