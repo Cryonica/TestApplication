@@ -36,7 +36,7 @@ namespace TestApplication
                         .Select(el=> el.ToString().PadLeft(2, '0'))
                         .ToArray();
                         
-                    if (InvokeRequired)
+                    if (comboBox1.InvokeRequired)
                     {
                         comboBox1.Invoke((MethodInvoker)delegate ()
                         {
@@ -91,44 +91,62 @@ namespace TestApplication
 
 
             //check input ID format
-            int targetInventLocationIdInt;
-            if (!int.TryParse(targetInventLocationId, out targetInventLocationIdInt)) return;
+            if (!int.TryParse(targetInventLocationId, out int targetInventLocationIdInt)) return;
 
             using (db = new TestDB())
             {
-                bool presentTargetInventLocationId = db.InventLocation
-                     .Where(el => el.InventLocationId == targetInventLocationId)
-                     .Any();
-                if (!presentTargetInventLocationId)
+                
+                using (var transaction = db.Database.BeginTransaction())
                 {
-                    InventLocation newiIventLocation = MockDataFill.GetInventLocations(1).FirstOrDefault();
-                    if (newiIventLocation != null)
+                    try
                     {
-                        newiIventLocation.InventLocationId = targetInventLocationId;
-                        db.InventLocation.Add(newiIventLocation);
-                        db.SaveChanges();
+                        bool presentTargetInventLocationId = db.InventLocation
+                            .Where(el => el.InventLocationId == targetInventLocationId)
+                            .Any();
+                        if (!presentTargetInventLocationId)
+                        {
+                            InventLocation newiIventLocation = MockDataFill.GetInventLocations(1).FirstOrDefault();
+                            if (newiIventLocation != null)
+                            {
+                                newiIventLocation.InventLocationId = targetInventLocationId;
+                                db.InventLocation.Add(newiIventLocation);
+                                db.SaveChanges();
+                            }
+                        }
+                        else
+                        {
+                            infoForm = new InfoForm("Update records");
+                            infoForm.TopMost = true;
+                            Task.Run(() =>
+                            {
+                                infoForm.ShowDialog();
+                            });
+                            SaveChanges(fromValue, toValue, targetInventLocationId, db);
+                        }
+                        transaction.Commit();
+                        DialogResult = DialogResult.OK;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        DialogResult = DialogResult.Cancel;
+                        Loggeer.Instance.Log(ex.Message);
+                        MessageBox.Show("Error during saving changes");
                     }
                 }
-                else
-                {
-                    infoForm = new InfoForm("Update records");
-                    infoForm.TopMost = true;
-                    Task.Run(() =>
-                    {
-                        infoForm.ShowDialog();
-                    });
-                    SaveChanges(fromValue, toValue, targetInventLocationId, db);
-                    
-
-                }
+                
             }
-            DialogResult = DialogResult.OK;
-            
             this.Close();
             
         }
         private void SaveChanges(string fromValue, string toValue, string targetInventLocationId,  TestDB testDB)
         {
+            var ts = testDB.InventDim
+                     .Where(d => d.WMSLocationId.CompareTo(fromValue) >= 0 && d.WMSLocationId.CompareTo(toValue) <= 0)
+                     .ToList();
+
+
+
             testDB.InventDim
                      .Where(d => d.WMSLocationId.CompareTo(fromValue) >= 0 && d.WMSLocationId.CompareTo(toValue) <= 0)
                      .ToList()

@@ -33,19 +33,22 @@ namespace TestApplication
         bool firstLoad = false;
         InfoForm infoForm = null;
         InventLocation selectedItem = null;
-        internal Loggeer appLogger = null;
-        const string errorFileName = "errors.log";
         
         public Form1()
         {
+            Task.Run(() =>
+            {
+                infoForm = new InfoForm("Loading");
+                infoForm.ShowDialog();
+            });
             
             InitializeComponent();
+            
 
             // take info for logger
             string assemblyPath = Assembly.GetExecutingAssembly().Location;
             string directoryPath = Path.GetDirectoryName(assemblyPath);
-            appLogger = new Loggeer(Path.Combine(directoryPath, errorFileName));
-
+            
             //read data from database
             AddDataToDateBase();
 
@@ -67,19 +70,30 @@ namespace TestApplication
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            
+           
+
             UniqueWMS.Text = "Please select row from left table";
 
             //loading records from dataBase
-            await LoadDataAsync();
+            bool loadResult = await LoadDataAsync();
 
             this.InventLocationDataGrid.CellFormatting += InventDiDataGrid_CellFormatting;
 #if DEBUG
             this.InventLocationDataGrid.DataError += InventLocationDataGrid_DataError;
 #endif
             this.InventLocationDataGrid.SelectionChanged += InventLocationDataGrid_SelectionChanged;
-            CloseInfoForm(infoForm);
-            this.TopMost = true;
+            if (loadResult)
+            {
+                CloseInfoForm(infoForm);
+                this.Opacity = 1;
+            }
+            else
+            {
+                CloseInfoForm(infoForm);
+                MessageBox.Show("Error during loading data");
+                this.Close();
+            }
+
 
         }
 
@@ -114,7 +128,7 @@ namespace TestApplication
                 catch (DataException ex)
                 {
                     //wrong value type handler
-                    appLogger.Log(ex.Message);
+                    Loggeer.Instance.Log(ex.Message);
                 }
             }
 #endif
@@ -122,7 +136,7 @@ namespace TestApplication
 
         private void InventLocationDataGrid_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            appLogger.Log(e.ToString());
+            Loggeer.Instance.Log(e.ToString());
         }
 
         private async void InventLocationDataGrid_SelectionChanged(object sender, EventArgs e)
@@ -135,7 +149,9 @@ namespace TestApplication
                 var selectedIdims = inventDims
                     .Where(item => item.InventLocationId == selectedItem.InventLocationId).ToList();
 
-                var wmsCount = await FillDataGridView(InventDiDataGrid, selectedIdims);
+                int wmsCount = selectedIdims.Select(el => el.WMSLocationId).Distinct().Count();
+
+                await FillDataGridView(InventDiDataGrid, selectedIdims);
                 UniqueWMS.Text = $"UniqueWMS: {wmsCount}";
             }
 
@@ -160,7 +176,7 @@ namespace TestApplication
                 }
                 catch (DataException ex)
                 {
-                    appLogger.Log(ex.Message);
+                    Loggeer.Instance.Log(ex.Message);
                 }
             }
             InventLocationDataGrid.Columns[e.ColumnIndex].ReadOnly = true;
@@ -205,6 +221,7 @@ namespace TestApplication
             else
             {
                 CloseInfoForm(infoForm);
+                
             }
 
         }
@@ -214,20 +231,30 @@ namespace TestApplication
         #region Functions
 
         //Reading data from dataBase on first launch
-        private async Task LoadDataAsync()
+        private async Task<bool> LoadDataAsync()
         {
-            using (db = new TestDB())
+            bool result = false;
+            
+            try
             {
-                //get data from dataBase
-                inventLocations = await db.InventLocation.ToListAsync();
-                inventDims = await db.InventDim.ToListAsync();
+                using (db = new TestDB())
+                {
+                    //get data from dataBase
+                    inventLocations = await db.InventLocation.ToListAsync();
+                    inventDims = await db.InventDim.ToListAsync();
 
-                //create rows and columns in the DataGridViews
-                await Task.Run(()=> FillDataGridView<InventLocation>(InventLocationDataGrid, inventLocations));
-                await Task.Run(() => FillDataGridView<InventDim>(InventDiDataGrid, inventDims));
-               
-
+                    //create rows and columns in the DataGridViews
+                    await Task.Run(() => FillDataGridView<InventLocation>(InventLocationDataGrid, inventLocations));
+                    await Task.Run(() => FillDataGridView<InventDim>(InventDiDataGrid, inventDims));
+                    result = true;
+                }
             }
+            catch (Exception ex)
+            {
+                Loggeer.Instance.Log(ex.Message);
+            }
+            return result;
+            
 
         }
         
@@ -258,33 +285,50 @@ namespace TestApplication
                         //create mock records in dataBase
                         db.InventLocation.AddRange(inventLocations);
                         db.InventDim.AddRange(inventDims);
+                        using (var transaction = db.Database.BeginTransaction())
+                        {
 #if DEBUG
-                        try
-                        {
-
-                            db.SaveChanges();
-                           
-
-                        }
-                        catch (DbEntityValidationException e)
-                        {
-                            //exception handler (if datafields in mock lists with wrond type)
-                            StringBuilder stringBuilder = new StringBuilder();
-                            foreach (var eve in e.EntityValidationErrors)
+                            Loggeer.Instance.Log("creating mock data");
+                            try
                             {
-                                stringBuilder.AppendFormat("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:\n",
-                                    eve.Entry.Entity.GetType().Name, eve.Entry.State);
-                                foreach (var ve in eve.ValidationErrors)
-                                {
-                                    stringBuilder.AppendFormat("- Property: \"{0}\", Error: \"{1}\"\n", ve.PropertyName, ve.ErrorMessage);
-                                }
+                                db.SaveChanges();
+                                transaction.Commit();
                             }
-                            appLogger.Log(stringBuilder.ToString());
-                            throw;
-                        }
+                            catch (DbEntityValidationException e)
+                            {
+                                //exception handler (if datafields in mock lists with wrond type)
+
+                                StringBuilder stringBuilder = new StringBuilder();
+                                foreach (var eve in e.EntityValidationErrors)
+                                {
+                                    stringBuilder.AppendFormat("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:\n",
+                                        eve.Entry.Entity.GetType().Name, eve.Entry.State);
+                                    foreach (var ve in eve.ValidationErrors)
+                                    {
+                                        stringBuilder.AppendFormat("- Property: \"{0}\", Error: \"{1}\"\n", ve.PropertyName, ve.ErrorMessage);
+                                    }
+                                }
+                                Loggeer.Instance.Log(stringBuilder.ToString());
+                                transaction.Rollback();
+                            }
+                            catch (System.Data.SqlClient.SqlException e)
+                            {
+                                Loggeer.Instance.Log(e.Message);
+                            }
 #else
-                        db.SaveChanges();
+                            try
+                            {
+                                db.SaveChanges();
+                            }
+                            catch (Exception ex)
+                            {
+                                appLogger.Log(ex.Message);
+                                transaction.Rollback();
+                            }
+                            
 #endif
+                        }
+
 
                     }
 
@@ -295,6 +339,7 @@ namespace TestApplication
 
                         #region for test mode - Deleting Existing Tables
 
+                        //Loggeer.Instance.Log("delete data");
                         //var tableName1 = "InventLocation";
                         //var tableName2 = "InventDim";
                         //var sql1 = $"TRUNCATE TABLE {tableName1}";

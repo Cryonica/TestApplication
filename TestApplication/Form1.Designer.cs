@@ -81,6 +81,8 @@
             this.Controls.Add(this.InventDiDataGrid);
             this.Controls.Add(this.InventLocationDataGrid);
             this.Name = "Form1";
+            this.Opacity = 0D;
+            this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.InventLocationDataGrid)).EndInit();
