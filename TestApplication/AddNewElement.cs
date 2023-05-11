@@ -12,12 +12,16 @@ namespace TestApplication
         TestDB db;
         InventLocation inventLocation;
         internal InfoForm infoForm;
+        private readonly int inventLocationIdInt;
         public AddNewElement(InventLocation inventLocation)
         {
+
+            int.TryParse(inventLocation.InventLocationId, out inventLocationIdInt);
             InitializeComponent();
             
             this.inventLocation = inventLocation;
             this.Load += AddNewElement_Load;
+            
         }
 
         private void AddNewElement_Load(object sender, EventArgs e)
@@ -56,8 +60,7 @@ namespace TestApplication
 
         private void button1_Click(object sender, EventArgs e)
         {
-            this.Visible = false;
-            this.TopMost = false;
+            
             //chek for null
             if (comboBox1.SelectedItem == null) return;
             if (comboBox2.SelectedItem == null) return;
@@ -87,11 +90,17 @@ namespace TestApplication
             }
             string fromValue = comboBox1.SelectedItem.ToString();
             string toValue = comboBox2.SelectedItem.ToString();
-
-
-
+            
             //check input ID format
             if (!int.TryParse(targetInventLocationId, out int targetInventLocationIdInt)) return;
+
+            if (targetInventLocationIdInt == inventLocationIdInt)
+            {
+                MessageBox.Show("Target equals source");
+                return;
+            }
+            
+
 
             using (db = new TestDB())
             {
@@ -100,11 +109,19 @@ namespace TestApplication
                 {
                     try
                     {
+                        this.TopLevel = false;
+                        
+                        Task.Run(() =>
+                        {
+                            infoForm = new InfoForm("Update records");
+                            infoForm.ShowDialog();
+                        });
                         bool presentTargetInventLocationId = db.InventLocation
                             .Where(el => el.InventLocationId == targetInventLocationId)
                             .Any();
                         if (!presentTargetInventLocationId)
                         {
+                            //generation 1 mock record 
                             InventLocation newiIventLocation = MockDataFill.GetInventLocations(1).FirstOrDefault();
                             if (newiIventLocation != null)
                             {
@@ -115,13 +132,7 @@ namespace TestApplication
                         }
                         else
                         {
-                            infoForm = new InfoForm("Update records");
-                            infoForm.TopMost = true;
-                            Task.Run(() =>
-                            {
-                                infoForm.ShowDialog();
-                            });
-                            SaveChanges(fromValue, toValue, targetInventLocationId, db);
+                            UpdateWMS(fromValue, toValue, targetInventLocationId, db);
                         }
                         transaction.Commit();
                         DialogResult = DialogResult.OK;
@@ -139,15 +150,9 @@ namespace TestApplication
             this.Close();
             
         }
-        private void SaveChanges(string fromValue, string toValue, string targetInventLocationId,  TestDB testDB)
+        private void UpdateWMS(string fromValue, string toValue, string targetInventLocationId,  TestDB testDB)
         {
-            var ts = testDB.InventDim
-                     .Where(d => d.WMSLocationId.CompareTo(fromValue) >= 0 && d.WMSLocationId.CompareTo(toValue) <= 0)
-                     .ToList();
-
-
-
-            testDB.InventDim
+           testDB.InventDim
                      .Where(d => d.WMSLocationId.CompareTo(fromValue) >= 0 && d.WMSLocationId.CompareTo(toValue) <= 0)
                      .ToList()
                      .ForEach(d => d.InventLocationId = targetInventLocationId);

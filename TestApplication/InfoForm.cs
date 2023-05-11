@@ -14,8 +14,11 @@ namespace TestApplication
             this.Load += InfoForm_Load;
             
         }
-
-        
+        public void SetLabelText(string message)
+        {
+            label1.Text = message;
+            loadingText = message;
+        }
 
         private async void InfoForm_Load(object sender, EventArgs e)
         {
@@ -42,7 +45,7 @@ namespace TestApplication
             }
             else
             {
-                label1.Text += ". "; // добавляем точку
+                label1.Text += ". "; 
             }
         }
 

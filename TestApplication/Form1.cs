@@ -44,11 +44,6 @@ namespace TestApplication
             
             InitializeComponent();
             
-
-            // take info for logger
-            string assemblyPath = Assembly.GetExecutingAssembly().Location;
-            string directoryPath = Path.GetDirectoryName(assemblyPath);
-            
             //read data from database
             AddDataToDateBase();
 
@@ -71,7 +66,6 @@ namespace TestApplication
         private async void Form1_Load(object sender, EventArgs e)
         {
            
-
             UniqueWMS.Text = "Please select row from left table";
 
             //loading records from dataBase
@@ -85,7 +79,8 @@ namespace TestApplication
             if (loadResult)
             {
                 CloseInfoForm(infoForm);
-                this.Opacity = 1;
+                this.Opacity = 100;
+                this.TopLevel = true;
             }
             else
             {
@@ -93,8 +88,6 @@ namespace TestApplication
                 MessageBox.Show("Error during loading data");
                 this.Close();
             }
-
-
         }
 
         private void InventDiDataGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -192,7 +185,7 @@ namespace TestApplication
                 TopMost = true,
                 StartPosition = FormStartPosition.CenterScreen
             };
-            this.TopMost = false;
+            //this.TopMost = false;
             DialogResult dialogResult = addNewElement.ShowDialog();
             infoForm = addNewElement.infoForm;
             if (dialogResult == DialogResult.OK)
@@ -254,14 +247,13 @@ namespace TestApplication
                 Loggeer.Instance.Log(ex.Message);
             }
             return result;
-            
-
         }
         
         //create mock records in dataBase
         private void AddDataToDateBase()
         {
             //first start check records and adding mock data
+            const string mockInfo = "Creating mock records ";
             using (db = new TestDB())
             {
                 if (db.Database.Exists())
@@ -271,11 +263,21 @@ namespace TestApplication
                         //create splash window
                         Task.Run(() =>
                         {
-                            infoForm = new InfoForm("Creating mock records ")
+                            if (infoForm != null && infoForm.InvokeRequired)
                             {
-                                TopMost = true
-                            };
-                            infoForm.ShowDialog();
+                                infoForm.Invoke(new MethodInvoker(() =>
+                                {
+                                    infoForm.SetLabelText(mockInfo);
+                                }));
+                            }
+                            else
+                            {
+                                infoForm = new InfoForm(mockInfo)
+                                {
+                                    TopMost = true
+                                };
+                                infoForm.ShowDialog();
+                            }
                         });
 
                         //set data into global variables
@@ -328,8 +330,6 @@ namespace TestApplication
                             
 #endif
                         }
-
-
                     }
 
                     else
